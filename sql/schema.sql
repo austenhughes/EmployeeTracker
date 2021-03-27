@@ -12,8 +12,6 @@ CREATE TABLE departments (
 CREATE TABLE roles (
   id INT AUTO_INCREMENT NOT NULL,
   jobTitle VARCHAR(30) NULL,
-  salery DECIMAL(10,2) NULL,
-  departmentID INT NULL,
   PRIMARY KEY (id)
 );
 
@@ -23,6 +21,8 @@ CREATE TABLE employees (
   lastName VARCHAR(30) NULL,
   jobTitleID INT NULL,
   ManagerID INT NULL,
+  departmentID INT NULL,
+  salery DECIMAL(10,2) NULL,
   PRIMARY KEY (id)
 );
 

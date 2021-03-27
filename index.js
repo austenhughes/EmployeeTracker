@@ -12,6 +12,10 @@ const connection = mysql.createConnection({
   database: 'employeeDB',
 });
 
+connection.connect((err) => {
+  if (err) throw err;
+  run();
+});
 
 const run = () => {
   inquirer.prompt(
@@ -23,6 +27,7 @@ const run = () => {
         choices: [
         'sort employees',
         'add',
+        'edit',
         'exit'
         ]
             },
@@ -40,6 +45,9 @@ function direct() {
           break;
         case 'add':
         addWhat();
+          break;
+        case 'edit':
+        updateEmployeeRole();
           break;
         default:
             console.log("goodby")
@@ -68,7 +76,7 @@ function addWhat(){
 }
 
 function direct3 (){
-  switch(sorting) {
+  switch(addingWhat) {
     case 'employee':
     addEmployee();
       break;
@@ -104,10 +112,10 @@ function sortEmployees() {
 function direct2 (){
   switch(sorting) {
     case 'Department':
-    sortByDepartment();
+    selectDepartment();
       break;
     case 'Role':
-    sortByRole();
+    selectRole();
       break;
     case 'Employee':
     sortByEmployee();
@@ -117,27 +125,95 @@ function direct2 (){
 }
 };
 
-function sortByDepartment(){
-console.log("bob over here")
+function selectDepartment(){
+sortByDepartment();
 };
 
-function sortByRole(){
-console.log("bob over there")
+function sortByDepartment(){
+console.log("sortByDepartment working");
+run();
+};
+
+function selectRole(){
+  connection.query('SELECT * FROM roles', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        name: 'rolesSorted',
+        type: 'list',
+        message: 'who would you like to see',
+        choices() {
+          const rolesArray = [];
+          results.forEach(({ id }) => {
+          rolesArray.push(id);
+          });
+          return rolesArray;
+        },
+    }, 
+    ])
+    })
+    connection.end()
+    .then((answer) => {
+      const query = 'SELECT * FROM employees WHERE roles.id = ?';
+      connection.query(query, answer.rolesSorted , (err, res) => {
+        res.forEach(({firstName, lastName,}) => {
+          console.log(
+            `fist: ${firstName} || last: ${lastName}`
+          );
+        });
+    });
+    connection.end();
+    // connection.end();
+    // sortByRole();
+    });
+  
+
+// function sortByRole(){
+// console.log("sortByRole working");
+// const query = 'SELECT * FROM employees WHERE roles.id = ?'
+// connection.query(query, sortingRole , (err, results) => {
+// if (err) throw err;
+// console.log(results)
+// });
+// connection.end();
 };
 
 function sortByEmployee(){
-console.log("bob everywhere")
+connection.query('SELECT * FROM employees', (err, results) => {
+if (err) throw err;
+inquirer.prompt([
+  {
+    name: 'employeesSorted',
+    type: 'list',
+    message: 'select an employee',
+    choices() {
+      const employeeArray = [];
+      results.forEach(({ firstName }) => {
+      employeeArray.push(firstName);
+      });
+      return employeeArray;
+    },
+}, 
+])
+});
+connection.end();
 };
 
 function addDepartment(){
-
+console.log("addDepartment working");
+run();
 };
 
 function addRole(){
-
+console.log("addRole working");
+run();
 };
 
-function addEmployee() { 
+function addEmployee() {
+  
+  connection.query('SELECT * FROM departments, roles, employees', (err, results) => {
+  if (err) throw err;
+
     inquirer.prompt([
     {
     name: 'firstName',
@@ -156,47 +232,55 @@ function addEmployee() {
   },
   {
       name: 'role',
-      type: 'list',
+      type: 'rawlist',
       message: 'What is your job title/role?',
-      choices: [
-      '1) Bob',
-      '2) Robot',
-      '3) Person',
-      '4) DOG'
-      ]
+      choices() {
+        const titleArray = [];
+        results.forEach(({ jobTitle }) => {
+        titleArray.push(jobTitle);
+        });
+        return titleArray;
+      },    
   },
   {
       name: 'department',
-      type: 'list',
+      type: 'rawlist',
       message: 'What is your department?',
-      choices: [
-      '1) Employee',
-      '2) Manager',
-      '3) Research',
-      '4) GOD'
-      ]
+      choices() {
+          const departmentArray = [];
+          results.forEach(({ departmentName }) => {
+          departmentArray.push(departmentName);
+          });
+          return departmentArray;
+        },    
   },
   {
       name: 'manager',
       type: 'list',
       message: 'Who is your manager?',
-      choices: [
-      '1) choice 1',
-      '2) choice 2',
-      '3) choice 3',
-      '4) choice 4'
-      ]
-  } 
-  ])};
+      choices() {
+        const managerArray = [];
+        results.forEach(({ firstName }) => {
+        managerArray.push(firstName);
+        });
+        return managerArray;
+      },
+  }, 
+  ])
+});
+connection.end();
+};
 
 function updateEmployeeRole(){
-
+console.log("updateEmployeeRole working");
+run();
 };
  
 let choice = "";
 let sorting = "";
 let addingWhat = "";
+let sortingRole = "";
 
-run();
+
     
 
