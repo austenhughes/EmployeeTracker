@@ -1,36 +1,112 @@
 const inquirer = require('inquirer');
+const mysql = require('mysql');
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+
+  port: 3306,
+
+  user: 'root',
+
+  password: 'Merlin0502!',
+  database: 'employeeDB',
+});
 
 
 const run = () => {
-
   inquirer.prompt(
       [
-  {
+        {
+        name: 'start',
+        type: 'list',
+        message: 'What would you like to do?',
+        choices: [
+        'sort employees',
+        'add employee',
+        'exit'
+        ]
+            },
+        ])
+        .then((answer) => {
+            choice = answer.start;
+            direct();
+          })
+};
+
+function direct() {
+    switch(choice) {
+        case 'sort employees':
+        sortEmployees();
+          break;
+        case 'add employee':
+        addEmployee();
+          break;
+        default:
+            console.log("goodby")
+            connection.end();
+    }
+};
+
+function sortEmployees() {
+  inquirer.prompt(
+    {
+      name: 'sort',
+      type: 'list',
+      message: 'sort by : ',
+      choices: [
+      'Department',
+      'Role',
+      'Employee'
+      ]
+    })
+    .then((answer) => {
+      sorting = answer.sort;
+      direct2();
+    });  
+};
+
+function direct2 (){
+  switch(sorting) {
+    case 'Department':
+    sortByDepartment();
+      break;
+    case 'Role':
+    sortByRole();
+      break;
+    case 'Employee':
+    sortByEmployee();
+      break;
+    default:
+        console.log("not working")
+}
+};
+
+function sortByDepartment(){
+console.log("bob over here")
+};
+function sortByRole(){
+console.log("bob over there")
+};
+function sortByEmployee(){
+console.log("bob everywhere")
+};
+
+function addEmployee() { 
+    inquirer.prompt([
+    {
     name: 'firstName',
     type: 'input',
     message: 'first name?',
   },
-
   {
     name: 'lastName',
     type: 'input',
     message: 'last name?',
   },
-
   {
-    name: 'salery',
+    name: 'salary',
     type: 'input',
-    message: 'what is your yearly salery?',
-  },
-
-  {
-      name: 'start',
-      type: 'list',
-      message: 'What would you like to do?',
-      choices: [
-      'sort employees?',
-      'add employee'
-      ]
+    message: 'what is your yearly salary?',
   },
   {
       name: 'role',
@@ -65,8 +141,11 @@ const run = () => {
       '4) choice 4'
       ]
   } 
-      ]);
-}
+  ])};
+ 
+let choice = "";
+let sorting = "";
 
 run();
+    
 
