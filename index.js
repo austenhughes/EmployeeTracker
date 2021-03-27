@@ -22,7 +22,7 @@ const run = () => {
         message: 'What would you like to do?',
         choices: [
         'sort employees',
-        'add employee',
+        'add',
         'exit'
         ]
             },
@@ -38,13 +38,49 @@ function direct() {
         case 'sort employees':
         sortEmployees();
           break;
-        case 'add employee':
-        addEmployee();
+        case 'add':
+        addWhat();
           break;
         default:
             console.log("goodby")
             connection.end();
     }
+};
+
+function addWhat(){
+  inquirer.prompt(
+    [
+      {
+      name: 'addChoice',
+      type: 'list',
+      message: 'What would you like to add?',
+      choices: [
+      'employee',
+      'department',
+      'job/role'
+      ]
+          },
+      ])
+      .then((answer) => {
+          addingWhat = answer.addChoice;
+          direct3();
+        })  
+}
+
+function direct3 (){
+  switch(sorting) {
+    case 'employee':
+    addEmployee();
+      break;
+    case 'department':
+    addDepartment();
+      break;
+    case 'job/role':
+    addRole();
+      break;
+    default:
+        console.log("not working")
+}
 };
 
 function sortEmployees() {
@@ -84,11 +120,21 @@ function direct2 (){
 function sortByDepartment(){
 console.log("bob over here")
 };
+
 function sortByRole(){
 console.log("bob over there")
 };
+
 function sortByEmployee(){
 console.log("bob everywhere")
+};
+
+function addDepartment(){
+
+};
+
+function addRole(){
+
 };
 
 function addEmployee() { 
@@ -142,9 +188,14 @@ function addEmployee() {
       ]
   } 
   ])};
+
+function updateEmployeeRole(){
+
+};
  
 let choice = "";
 let sorting = "";
+let addingWhat = "";
 
 run();
     
