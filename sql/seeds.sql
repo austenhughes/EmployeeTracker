@@ -10,7 +10,7 @@ values
 ('manager'),
 ('monkey'),
 ('bob');
-INSERT INTO employees (firstName, lastName, jobTitleID, ManagerID, departmentID, salery) 
+INSERT INTO employees (firstName, lastName, jobTitleID, ManagerID, departmentID, salary) 
 values 
 ('bob', 'bobman', '4', '1', '1', '20000.00'),
 ('bob2', 'bobsmith', '3', '1', '1', '200000.00'),

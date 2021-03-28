@@ -47,7 +47,8 @@ function direct() {
         addWhat();
           break;
         case 'edit':
-        updateEmployeeRole();
+        // updateEmployeeRole();
+        editWhat();
           break;
         default:
             console.log("goodby")
@@ -91,6 +92,90 @@ function direct3 (){
 }
 };
 
+function editWhat(){
+  inquirer.prompt(
+    [
+      {
+      name: 'editChoice',
+      type: 'list',
+      message: 'What would you like to edit?',
+      choices: [
+      'employee',
+      'department',
+      'job/role'
+      ]
+          },
+      ])
+      .then((answer) => {
+          editThis = answer.editChoice;
+          direct4();
+        })  
+}
+
+function direct4(){
+  switch(editThis) {
+    case 'employee':
+    editEmployeeStart();
+      break;
+    case 'department':
+    editDepartment();
+      break;
+    case 'job/role':
+    editRole();
+      break;
+    default:
+        console.log("not working")
+}
+}
+
+function editEmployeeStart(){
+  inquirer.prompt(
+    [
+      {
+      name: 'editEmployeeDetails',
+      type: 'list',
+      message: 'What would you like to edit?',
+      choices: [
+      'firstName',
+      'lastName',
+      'job/roleID',
+      'salary',
+      'managerID',
+      'departmentID',
+      ]
+          },
+      ])
+      .then((answer) => {
+          editEmployee = answer.editEmployeeDetails;
+          direct5();
+        })  
+};
+
+function direct5(){
+  switch(editEmployee) {
+    case 'firstName':
+    updateFirstName();
+      break;
+    case 'lastName':
+    updateLastName();
+      break;
+    case 'job/roleID':
+    updateEmployeeRole();
+      break;
+    case 'salary':
+    updateSalary();
+      break;
+    case 'managerID':
+    updateManager();
+      break;
+    case 'departmentID':
+    updateDepartment();
+      break;
+    default:
+        console.log("goodby")
+}
+};
+
 function sortEmployees() {
   inquirer.prompt(
     {
@@ -100,7 +185,8 @@ function sortEmployees() {
       choices: [
       'Department',
       'Role',
-      'Employee'
+      'Employee',
+      'Manger'
       ]
     })
     .then((answer) => {
@@ -120,8 +206,11 @@ function direct2 (){
     case 'Employee':
     sortByEmployee();
       break;
+    case 'Manger':
+    selectManager();
+      break;
     default:
-        console.log("not working")
+      console.log("not working")
 }
 };
 
@@ -150,12 +239,49 @@ function selectDepartment(){
           if (err) throw err;
           else {
             const employeeByDepartmentArray = [];
-            res.forEach(({ firstName }) => {
-            employeeByDepartmentArray.push(firstName); 
+            res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
+            employeeByDepartmentArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
           });
             connection.end();
             console.log(employeeByDepartmentArray);
             return employeeByDepartmentArray;
+          };
+    })
+  })
+});
+};
+
+function selectManager(){
+  connection.query('SELECT * FROM employees', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt(
+      {
+        name: 'managerTeamsSorted',
+        type: 'list',
+        message: 'Which managers employee team would you like to see? ',
+        choices() {
+          const ManagerTeamsArray = [];
+          results.forEach(({ managerID }) => {
+          ManagerTeamsArray.push(managerID);
+          });
+          return ManagerTeamsArray;
+        },
+    } 
+    )
+    .then((answer) => {
+      connection.query(
+        'SELECT * FROM employees WHERE ?',
+        {managerID: answer.managerTeamsSorted},
+        (err, res) => {
+          if (err) throw err;
+          else {
+            const employeeByManagerArray = [];
+            res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
+            employeeByManagerArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
+          });
+            connection.end();
+            console.log(employeeByManagerArray);
+            return employeeByManagerArray;
           };
     })
   })
@@ -187,8 +313,8 @@ function selectRole(){
           if (err) throw err;
           else {
             const employeeByRolesArray = [];
-            res.forEach(({ firstName }) => {
-            employeeByRolesArray.push(firstName);
+            res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
+            employeeByRolesArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
           });
             connection.end(); 
             console.log(employeeByRolesArray);
@@ -224,8 +350,8 @@ inquirer.prompt(
       if (err) throw err;
       else {
         const employeesSortedArray = [];
-        res.forEach(({ firstName }) => {
-        employeesSortedArray.push(firstName);
+        res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
+        employeesSortedArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
       });
         connection.end(); 
         console.log(employeesSortedArray);
@@ -251,7 +377,6 @@ connection.query(
   {departmentName : answer.newDepartment},
   (err, res) => {
     if (err) throw err;
-    console.log(`${res.affectedRows}`)
   })
 });
 };
@@ -270,7 +395,6 @@ function addRole(){
     {jobTitle : answer.newRole},
     (err, res) => {
       if (err) throw err;
-      console.log(res)
     })
   });
   };
@@ -299,11 +423,11 @@ function addEmployee() {
   {
       name: 'role',
       type: 'list',
-      message: 'What is your job title/role?',
+      message: 'What is your job title/role ID?',
       choices() {
         const titleArray = [];
-        results.forEach(({ jobTitle }) => {
-        titleArray.push(jobTitle);
+        results.forEach(({ jobTitleID }) => {
+        titleArray.push(jobTitleID);
         });
         return titleArray;
       },    
@@ -311,11 +435,11 @@ function addEmployee() {
   {
       name: 'department',
       type: 'list',
-      message: 'What is your department?',
+      message: 'What is your department ID?',
       choices() {
           const departmentArray = [];
-          results.forEach(({ departmentName }) => {
-          departmentArray.push(departmentName);
+          results.forEach(({ departmentID }) => {
+          departmentArray.push(departmentID);
           });
           return departmentArray;
         },    
@@ -323,30 +447,351 @@ function addEmployee() {
   {
       name: 'manager',
       type: 'list',
-      message: 'Who is your manager?',
+      message: 'What is your managers ID?',
       choices() {
         const managerArray = [];
-        results.forEach(({ firstName }) => {
-        managerArray.push(firstName);
+        results.forEach(({ managerID }) => {
+        managerArray.push(managerID);
         });
         return managerArray;
       },
   }, 
   ])
+  .then((answer) => {
+    connection.query(
+      'INSERT INTO employees SET ?',
+      {
+        firstName: answer.firstName,
+        lastName: answer.lastName,
+        jobTitleID: answer.role,
+        managerID: answer.manager,
+        departmentID: answer.department,
+        salary: answer.salary
+      },
+      (err, res) => {
+        if (err) throw err;
+      })
+      connection.end();
 });
-connection.end();
-};
+});
+}
 
 function updateEmployeeRole(){
-console.log("updateEmployeeRole working");
-run();
-};
- 
+  connection.query('SELECT * FROM employees', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        name: 'updateEmployee',
+        type: 'list',
+        message: 'for which employee : ',
+        choices() {
+          const updateEmployeeArray = [];
+          results.forEach(({ firstName }) => {
+          updateEmployeeArray.push(firstName);
+          });
+          return updateEmployeeArray;
+        }
+      },
+      {
+        name: 'updateRole',
+        type: 'list',
+        message: 'update role id to : ',
+        choices() {
+          const updateRoleArray = [];
+          results.forEach(({ jobTitleID }) => {
+          updateRoleArray.push(jobTitleID);
+          });
+          return updateRoleArray;
+        }
+      }, 
+    ]).then((answer) => {
+  connection.query(
+  'UPDATE employees SET ? WHERE ?',
+  [
+    {jobTitleID: answer.updateRole},
+    {firstName: answer.updateEmployee},
+  ],
+  (err, res) => {
+    if (err) throw err;
+  });
+connection.end();
+});
+})
+}
+
+function updateManager(){
+  connection.query('SELECT * FROM employees', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        name: 'updateEmployee',
+        type: 'list',
+        message: 'for which employee : ',
+        choices() {
+          const updateEmployeeArray = [];
+          results.forEach(({ firstName }) => {
+          updateEmployeeArray.push(firstName);
+          });
+          return updateEmployeeArray;
+        }
+      },
+      {
+        name: 'updateManager',
+        type: 'list',
+        message: 'New manager : ',
+        choices() {
+          const updateManagerArray = [];
+          results.forEach(({ managerID }) => {
+          updateManagerArray.push(managerID);
+          });
+          return updateManagerArray;
+        }
+      }, 
+    ]).then((answer) => {
+  connection.query(
+  'UPDATE employees SET ? WHERE ?',
+  [
+    {managerID: answer.updateManger},
+    {firstName: answer.updateEmployee},
+  ],
+  (err, res) => {
+    if (err) throw err;
+  });
+connection.end();
+});
+})
+}
+
+function updateDepartment(){
+  connection.query('SELECT * FROM employees', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        name: 'updateEmployee',
+        type: 'list',
+        message: 'for which employee : ',
+        choices() {
+          const updateEmployeeArray = [];
+          results.forEach(({ firstName }) => {
+          updateEmployeeArray.push(firstName);
+          });
+          return updateEmployeeArray;
+        }
+      },
+      {
+        name: 'updateDepartment',
+        type: 'list',
+        message: 'New department : ',
+        choices() {
+          const updateDepartmentArray = [];
+          results.forEach(({ departmentID }) => {
+            updateDepartmentArray.push(departmentID);
+          });
+          return updateDepartmentArray;
+        }
+      }, 
+    ]).then((answer) => {
+  connection.query(
+  'UPDATE employees SET ? WHERE ?',
+  [
+    {departmentID: answer.updateDepartment},
+    {firstName: answer.updateEmployee},
+  ],
+  (err, res) => {
+    if (err) throw err;
+  });
+connection.end();
+});
+})
+}
+
+function updateFirstName(){
+  connection.query('SELECT * FROM employees', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        name: 'updateEmployee',
+        type: 'list',
+        message: 'for which employee : ',
+        choices() {
+          const updateEmployeeArray = [];
+          results.forEach(({ firstName }) => {
+          updateEmployeeArray.push(firstName);
+          });
+          return updateEmployeeArray;
+        }
+      },
+      {
+        name: 'updateFirstName',
+        type: 'input',
+        message: 'update first name to : ',
+      }, 
+     
+    ]).then((answer) => {
+  connection.query(
+  'UPDATE employees SET ? WHERE ?',
+  [
+    {firstName: answer.updateFirstName},
+    {firstName: answer.updateEmployee},
+  ],
+  (err, res) => {
+    if (err) throw err;
+  });
+connection.end();
+});
+})
+}
+
+function updateLastName(){
+  connection.query('SELECT * FROM employees', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        name: 'updateEmployee',
+        type: 'list',
+        message: 'for which employee : ',
+        choices() {
+          const updateEmployeeArray = [];
+          results.forEach(({ firstName }) => {
+          updateEmployeeArray.push(firstName);
+          });
+          return updateEmployeeArray;
+        }
+      },
+      {
+        name: 'updateLastName',
+        type: 'input',
+        message: 'update last name to : ',
+      }
+    ]).then((answer) => {
+  connection.query(
+  'UPDATE employees SET ? WHERE ?',
+  [
+    {lastName: answer.updateLastName},
+    {firstName: answer.updateEmployee},
+  ],
+  (err, res) => {
+    if (err) throw err;
+  });
+connection.end();
+});
+})
+}
+
+function updateSalary(){
+  connection.query('SELECT * FROM employees', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        name: 'updateEmployee',
+        type: 'list',
+        message: 'for which employee : ',
+        choices() {
+          const updateEmployeeArray = [];
+          results.forEach(({ firstName }) => {
+          updateEmployeeArray.push(firstName);
+          });
+          return updateEmployeeArray;
+        }
+      },
+      {
+        name: 'updateSalary',
+        type: 'input',
+        message: 'New salary : ',
+      }
+    ]).then((answer) => {
+  connection.query(
+  'UPDATE employees SET ? WHERE ?',
+  [
+    {salary: answer.updateSalary},
+    {firstName: answer.updateEmployee},
+  ],
+  (err, res) => {
+    if (err) throw err;
+  });
+connection.end();
+});
+})
+}
+
+function editRole(){
+  connection.query('SELECT * FROM roles', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        name: 'updateRoleTitle',
+        type: 'list',
+        message: 'for which role/Title : ',
+        choices() {
+          const updateTitleArray = [];
+          results.forEach(({ jobTitle }) => {
+          updateTitleArray.push(jobTitle);
+          });
+          return updateTitleArray;
+        }
+      },
+      {
+        name: 'updateRoleTo',
+        type: 'input',
+        message: 'update role to : ',
+      }
+    ]).then((answer) => {
+  connection.query(
+  'UPDATE roles SET ? WHERE ?',
+  [
+    {jobTitle: answer.updateRoleTo},
+    {jobTitle: answer.updateRoleTitle},
+  ],
+  (err, res) => {
+    if (err) throw err;
+  });
+connection.end();
+});
+})
+}
+
+function editDepartment(){
+  connection.query('SELECT * FROM departments', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt([
+      {
+        name: 'updateDepartmentTitle',
+        type: 'list',
+        message: 'for which department : ',
+        choices() {
+          const updateDepartmentArray = [];
+          results.forEach(({ departmentName }) => {
+          updateDepartmentArray.push(departmentName);
+          });
+          return updateDepartmentArray;
+        }
+      },
+      {
+        name: 'updateDepartmentTo',
+        type: 'input',
+        message: 'update department to : ',
+      }
+    ]).then((answer) => {
+  connection.query(
+  'UPDATE departments SET ? WHERE ?',
+  [
+    {departmentName: answer.updateDepartmentTo},
+    {departmentName: answer.updateDepartmentTitle},
+  ],
+  (err, res) => {
+    if (err) throw err;
+  });
+connection.end();
+});
+})
+}
+
 let choice = "";
 let sorting = "";
 let addingWhat = "";
-let sortingRole = "";
+let editThis = "";
+let editEmployee = "";
 
 
 
-
+  

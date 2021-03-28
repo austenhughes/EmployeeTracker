@@ -20,9 +20,9 @@ CREATE TABLE employees (
   firstName VARCHAR(30) NULL,
   lastName VARCHAR(30) NULL,
   jobTitleID INT NULL,
-  ManagerID INT NULL,
+  managerID INT NULL,
   departmentID INT NULL,
-  salery DECIMAL(10,2) NULL,
+  salary DECIMAL(10,2) NULL,
   PRIMARY KEY (id)
 );
 
