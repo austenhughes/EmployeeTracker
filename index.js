@@ -238,14 +238,42 @@ inquirer.prompt(
 };
 
 function addDepartment(){
-console.log("addDepartment working");
-run();
+inquirer.prompt([
+  {
+    name: 'newDepartment',
+    type: 'input',
+    message: 'what is the new department?',
+  },
+])
+.then((answer) => {
+connection.query(
+  'INSERT INTO departments SET ?',
+  {departmentName : answer.newDepartment},
+  (err, res) => {
+    if (err) throw err;
+    console.log(`${res.affectedRows}`)
+  })
+});
 };
 
 function addRole(){
-console.log("addRole working");
-run();
-};
+  inquirer.prompt([
+    {
+      name: 'newRole',
+      type: 'input',
+      message: 'what is the new role/title?',
+    },
+  ])
+  .then((answer) => {
+  connection.query(
+    'INSERT INTO roles SET ?',
+    {jobTitle : answer.newRole},
+    (err, res) => {
+      if (err) throw err;
+      console.log(res)
+    })
+  });
+  };
 
 function addEmployee() {
   
