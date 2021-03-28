@@ -126,18 +126,46 @@ function direct2 (){
 };
 
 function selectDepartment(){
-sortByDepartment();
-};
-
-function sortByDepartment(){
-console.log("sortByDepartment working");
-run();
+  connection.query('SELECT * FROM departments', (err, results) => {
+    if (err) throw err;
+    inquirer.prompt(
+      {
+        name: 'departmentsSorted',
+        type: 'list',
+        message: 'what department would you like to see',
+        choices() {
+          const departmentArray = [];
+          results.forEach(({ id }) => {
+          departmentArray.push(id);
+          });
+          return departmentArray;
+        },
+    } 
+    )
+    .then((answer) => {
+      connection.query(
+        'SELECT * FROM employees WHERE ?',
+        {departmentID: answer.departmentsSorted},
+        (err, res) => {
+          if (err) throw err;
+          else {
+            const employeeByDepartmentArray = [];
+            res.forEach(({ firstName }) => {
+            employeeByDepartmentArray.push(firstName); 
+          });
+            connection.end();
+            console.log(employeeByDepartmentArray);
+            return employeeByDepartmentArray;
+          };
+    })
+  })
+});
 };
 
 function selectRole(){
   connection.query('SELECT * FROM roles', (err, results) => {
     if (err) throw err;
-    inquirer.prompt([
+    inquirer.prompt(
       {
         name: 'rolesSorted',
         type: 'list',
@@ -149,39 +177,32 @@ function selectRole(){
           });
           return rolesArray;
         },
-    }, 
-    ])
-    })
-    connection.end()
+    } 
+    )
     .then((answer) => {
-      const query = 'SELECT * FROM employees WHERE roles.id = ?';
-      connection.query(query, answer.rolesSorted , (err, res) => {
-        res.forEach(({firstName, lastName,}) => {
-          console.log(
-            `fist: ${firstName} || last: ${lastName}`
-          );
-        });
-    });
-    connection.end();
-    // connection.end();
-    // sortByRole();
-    });
-  
-
-// function sortByRole(){
-// console.log("sortByRole working");
-// const query = 'SELECT * FROM employees WHERE roles.id = ?'
-// connection.query(query, sortingRole , (err, results) => {
-// if (err) throw err;
-// console.log(results)
-// });
-// connection.end();
+      connection.query(
+        'SELECT * FROM employees WHERE ?',
+        {jobTitleID: answer.rolesSorted},
+        (err, res) => {
+          if (err) throw err;
+          else {
+            const employeeByRolesArray = [];
+            res.forEach(({ firstName }) => {
+            employeeByRolesArray.push(firstName);
+          });
+            connection.end(); 
+            console.log(employeeByRolesArray);
+            return employeeByRolesArray;
+          };
+    })
+  })
+});
 };
-
+  
 function sortByEmployee(){
 connection.query('SELECT * FROM employees', (err, results) => {
 if (err) throw err;
-inquirer.prompt([
+inquirer.prompt(
   {
     name: 'employeesSorted',
     type: 'list',
@@ -193,10 +214,27 @@ inquirer.prompt([
       });
       return employeeArray;
     },
-}, 
-])
+} 
+)
+.then((answer) => {
+  connection.query(
+    'SELECT * FROM employees WHERE ?',
+    {firstName: answer.employeesSorted},
+    (err, res) => {
+      if (err) throw err;
+      else {
+        const employeesSortedArray = [];
+        res.forEach(({ firstName }) => {
+        employeesSortedArray.push(firstName);
+      });
+        connection.end(); 
+        console.log(employeesSortedArray);
+        return employeesSortedArray;
+        // sortByRole();
+      };
+})
+})
 });
-connection.end();
 };
 
 function addDepartment(){
@@ -232,7 +270,7 @@ function addEmployee() {
   },
   {
       name: 'role',
-      type: 'rawlist',
+      type: 'list',
       message: 'What is your job title/role?',
       choices() {
         const titleArray = [];
@@ -244,7 +282,7 @@ function addEmployee() {
   },
   {
       name: 'department',
-      type: 'rawlist',
+      type: 'list',
       message: 'What is your department?',
       choices() {
           const departmentArray = [];
@@ -282,5 +320,5 @@ let addingWhat = "";
 let sortingRole = "";
 
 
-    
+
 
