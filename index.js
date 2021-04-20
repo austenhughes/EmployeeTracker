@@ -17,7 +17,7 @@ connection.connect((err) => {
   run();
 });
 
-const run = () => {
+function run()  {
   inquirer.prompt(
       [
         {
@@ -28,6 +28,7 @@ const run = () => {
         'sort employees',
         'add',
         'edit',
+        'information',
         'exit'
         ]
             },
@@ -47,13 +48,123 @@ function direct() {
         addWhat();
           break;
         case 'edit':
-        // updateEmployeeRole();
         editWhat();
+          break;
+        case 'information':
+        whatInformation();
           break;
         default:
             console.log("goodby")
             connection.end();
     }
+};
+
+function whatInformation(){
+  inquirer.prompt(
+    [
+      {
+      name: 'viewChoice',
+      type: 'list',
+      message: 'What would you like to view?',
+      choices: [
+      // 'all employees',
+      'managers',
+      'department names',
+      'jobs/roles'
+      ]
+          },
+      ])
+      .then((answer) => {
+          viewThis = answer.viewChoice;
+          direct6();
+        }) 
+};  
+
+function direct6(){
+  switch(viewThis) {
+    // case 'all employees':
+    // viewEmployees();
+    //   break;
+    case 'managers':
+    viewManagers();
+      break;
+    case 'department names':
+    viewDepartments();
+      break;
+    case 'jobs/roles':
+    viewRoles();
+      break;
+    default:
+        console.log("not working")}
+};
+
+function viewManagers(){
+  connection.query(
+    'SELECT * FROM employees WHERE ?',
+    {jobTitleID: 1},
+    (err, res) => {
+      if (err) throw err;
+      else {
+        const allManagersArray = [];
+        res.forEach(({ id, firstName, lastName }) => {
+          allManagersArray.push("id",id,"firstName",firstName,"lastName",lastName);
+      });
+        console.log(allManagersArray);
+        return allManagersArray;
+      };
+})
+  run();
+}
+
+// function viewEmployees(){
+//   connection.query(
+//     'SELECT * FROM employees',
+//     (err, res) => {
+//       if (err) throw err;
+//       else {
+//         const allEmployeeArray = [];
+//         res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
+//           allEmployeeArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
+//       });
+//         console.log(allEmployeeArray);
+//         return allEmployeeArray;
+//       };
+// })
+//   run();
+// };
+
+function viewDepartments(){
+  connection.query(
+    'SELECT * FROM departments',
+    (err, res) => {
+      if (err) throw err;
+      else {
+        const allDepartmentsArray = [];
+        res.forEach(({ id, departmentName }) => {
+          allDepartmentsArray.push("id",id, "department name",departmentName);
+      });
+        console.log(allDepartmentsArray);
+        return allDepartmentsArray;
+      };
+})
+  run();
+};
+
+function viewRoles(){
+  connection.query(
+    'SELECT * FROM roles',
+    (err, res) => {
+      if (err) throw err;
+      else {
+        const allRolesArray = [];
+        res.forEach(({ id, jobTitle }) => {
+          allRolesArray.push("id",id, "department name",jobTitle);
+      });
+        console.log(allRolesArray);
+        return allRolesArray;
+      };
+})
+  run();
 };
 
 function addWhat(){
@@ -74,9 +185,9 @@ function addWhat(){
           addingWhat = answer.addChoice;
           direct3();
         })  
-}
+};
 
-function direct3 (){
+function direct3(){
   switch(addingWhat) {
     case 'employee':
     addEmployee();
@@ -88,8 +199,7 @@ function direct3 (){
     addRole();
       break;
     default:
-        console.log("not working")
-}
+        console.log("not working")}
 };
 
 function editWhat(){
@@ -110,7 +220,7 @@ function editWhat(){
           editThis = answer.editChoice;
           direct4();
         })  
-}
+};
 
 function direct4(){
   switch(editThis) {
@@ -124,9 +234,8 @@ function direct4(){
     editRole();
       break;
     default:
-        console.log("not working")
-}
-}
+        console.log("not working")}
+};
 
 function editEmployeeStart(){
   inquirer.prompt(
@@ -172,11 +281,10 @@ function direct5(){
     updateDepartment();
       break;
     default:
-        console.log("goodby")
-}
+        console.log("goodby")}
 };
 
-function sortEmployees() {
+function sortEmployees(){
   inquirer.prompt(
     {
       name: 'sort',
@@ -195,7 +303,7 @@ function sortEmployees() {
     });  
 };
 
-function direct2 (){
+function direct2(){
   switch(sorting) {
     case 'Department':
     selectDepartment();
@@ -210,8 +318,7 @@ function direct2 (){
     selectManager();
       break;
     default:
-      console.log("not working")
-}
+      console.log("not working")}
 };
 
 function selectDepartment(){
@@ -242,14 +349,17 @@ function selectDepartment(){
             res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
             employeeByDepartmentArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
           });
-            connection.end();
             console.log(employeeByDepartmentArray);
             return employeeByDepartmentArray;
           };
     })
   })
-});
+  .then(() => {
+  run()
+  })
+  });
 };
+
 
 function selectManager(){
   connection.query('SELECT * FROM employees', (err, results) => {
@@ -258,13 +368,17 @@ function selectManager(){
       {
         name: 'managerTeamsSorted',
         type: 'list',
-        message: 'Which managers employee team would you like to see? ',
+        message: 'Which managers managers team would you like to see? ',
         choices() {
-          const ManagerTeamsArray = [];
+          let ManagerTeamsArray = [];
+          let filteredArray = [];
           results.forEach(({ managerID }) => {
           ManagerTeamsArray.push(managerID);
+          filteredArray = ManagerTeamsArray.filter((c ,index) =>{
+          return ManagerTeamsArray.indexOf(c) === index;
           });
-          return ManagerTeamsArray;
+          });
+          return filteredArray;
         },
     } 
     )
@@ -279,13 +393,15 @@ function selectManager(){
             res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
             employeeByManagerArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
           });
-            connection.end();
             console.log(employeeByManagerArray);
             return employeeByManagerArray;
           };
     })
   })
-});
+  .then(() => {
+    run()
+    }); 
+})
 };
 
 function selectRole(){
@@ -316,19 +432,21 @@ function selectRole(){
             res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
             employeeByRolesArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
           });
-            connection.end(); 
             console.log(employeeByRolesArray);
             return employeeByRolesArray;
           };
     })
   })
-});
+  .then(() => {
+  run()
+  });
+    })
 };
   
 function sortByEmployee(){
-connection.query('SELECT * FROM employees', (err, results) => {
-if (err) throw err;
-inquirer.prompt(
+  connection.query('SELECT * FROM employees', (err, results) => {
+  if (err) throw err;
+  inquirer.prompt(
   {
     name: 'employeesSorted',
     type: 'list',
@@ -340,9 +458,9 @@ inquirer.prompt(
       });
       return employeeArray;
     },
-} 
-)
-.then((answer) => {
+  } 
+  )
+  .then((answer) => {
   connection.query(
     'SELECT * FROM employees WHERE ?',
     {firstName: answer.employeesSorted},
@@ -353,32 +471,36 @@ inquirer.prompt(
         res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
         employeesSortedArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
       });
-        connection.end(); 
         console.log(employeesSortedArray);
         return employeesSortedArray;
-        // sortByRole();
       };
-})
-})
-});
+    })
+  })   
+  .then(() => {
+    run()
+    });
+    })
 };
 
 function addDepartment(){
-inquirer.prompt([
-  {
+  inquirer.prompt([
+    {
     name: 'newDepartment',
     type: 'input',
     message: 'what is the new department?',
-  },
-])
-.then((answer) => {
-connection.query(
-  'INSERT INTO departments SET ?',
-  {departmentName : answer.newDepartment},
-  (err, res) => {
+    },
+  ])
+  .then((answer) => {
+  connection.query(
+    'INSERT INTO departments SET ?',
+    {departmentName : answer.newDepartment},
+    (err, res) => {
     if (err) throw err;
-  })
-});
+    })
+    })
+    .then(() => {
+    run()
+    });
 };
 
 function addRole(){
@@ -396,10 +518,13 @@ function addRole(){
     (err, res) => {
       if (err) throw err;
     })
-  });
-  };
+    })
+    .then(() => {
+    run()
+    });
+};
 
-function addEmployee() {
+function addEmployee(){
   
   connection.query('SELECT * FROM departments, roles, employees', (err, results) => {
   if (err) throw err;
@@ -425,11 +550,17 @@ function addEmployee() {
       type: 'list',
       message: 'What is your job title/role ID?',
       choices() {
-        const titleArray = [];
+        let titleArray = [];
+        let filteredArray = [];
+
         results.forEach(({ jobTitleID }) => {
         titleArray.push(jobTitleID);
+
+        filteredArray = titleArray.filter((c ,index) =>{
+        return titleArray.indexOf(c) === index;
         });
-        return titleArray;
+        });
+        return filteredArray;
       },    
   },
   {
@@ -437,11 +568,18 @@ function addEmployee() {
       type: 'list',
       message: 'What is your department ID?',
       choices() {
-          const departmentArray = [];
+          let departmentArray = [];
+          let filteredArray = [];
+
           results.forEach(({ departmentID }) => {
           departmentArray.push(departmentID);
+
+          filteredArray = departmentArray.filter((c ,index) =>{
+          return departmentArray.indexOf(c) === index;
           });
-          return departmentArray;
+
+          });
+          return filteredArray;
         },    
   },
   {
@@ -450,12 +588,19 @@ function addEmployee() {
       message: 'What is your managers ID?',
       choices() {
         const managerArray = [];
+        let filteredArray = [];
+
         results.forEach(({ managerID }) => {
         managerArray.push(managerID);
+
+        filteredArray = managerArray.filter((c ,index) =>{
+        return managerArray.indexOf(c) === index;
         });
-        return managerArray;
+
+        });
+        return filteredArray;
       },
-  }, 
+  } 
   ])
   .then((answer) => {
     connection.query(
@@ -471,10 +616,12 @@ function addEmployee() {
       (err, res) => {
         if (err) throw err;
       })
-      connection.end();
-});
-});
-}
+  })
+  .then(() => {
+    run()
+    });
+  })
+};
 
 function updateEmployeeRole(){
   connection.query('SELECT * FROM employees', (err, results) => {
@@ -514,10 +661,12 @@ function updateEmployeeRole(){
   (err, res) => {
     if (err) throw err;
   });
-connection.end();
-});
-})
-}
+    })
+    .then(() => {
+      run()
+      });
+    })
+};
 
 function updateManager(){
   connection.query('SELECT * FROM employees', (err, results) => {
@@ -557,13 +706,15 @@ function updateManager(){
   (err, res) => {
     if (err) throw err;
   });
-connection.end();
-});
-})
-}
+    })
+    .then(() => {
+      run()
+      });
+    })
+};
 
 function updateDepartment(){
-  connection.query('SELECT * FROM employees', (err, results) => {
+  connection.query('SELECT * FROM employees FULL JOIN Department', (err, results) => {
     if (err) throw err;
     inquirer.prompt([
       {
@@ -584,8 +735,8 @@ function updateDepartment(){
         message: 'New department : ',
         choices() {
           const updateDepartmentArray = [];
-          results.forEach(({ departmentID }) => {
-            updateDepartmentArray.push(departmentID);
+          results.forEach(({ departmentid }) => {
+            updateDepartmentArray.push(departmentid);
           });
           return updateDepartmentArray;
         }
@@ -600,10 +751,12 @@ function updateDepartment(){
   (err, res) => {
     if (err) throw err;
   });
-connection.end();
-});
-})
-}
+    })
+    .then(() => {
+      run()
+      });
+    })
+};
 
 function updateFirstName(){
   connection.query('SELECT * FROM employees', (err, results) => {
@@ -637,10 +790,12 @@ function updateFirstName(){
   (err, res) => {
     if (err) throw err;
   });
-connection.end();
-});
-})
-}
+    })
+    .then(() => {
+      run()
+      });
+    })  
+};
 
 function updateLastName(){
   connection.query('SELECT * FROM employees', (err, results) => {
@@ -673,10 +828,12 @@ function updateLastName(){
   (err, res) => {
     if (err) throw err;
   });
-connection.end();
-});
-})
-}
+    })
+    .then(() => {
+      run()
+      });
+    })
+};
 
 function updateSalary(){
   connection.query('SELECT * FROM employees', (err, results) => {
@@ -709,10 +866,12 @@ function updateSalary(){
   (err, res) => {
     if (err) throw err;
   });
-connection.end();
-});
-})
-}
+    })
+    .then(() => {
+      run()
+      });
+    })
+};
 
 function editRole(){
   connection.query('SELECT * FROM roles', (err, results) => {
@@ -745,10 +904,12 @@ function editRole(){
   (err, res) => {
     if (err) throw err;
   });
-connection.end();
-});
-})
-}
+    })
+    .then(() => {
+      run()
+      });
+    })
+};
 
 function editDepartment(){
   connection.query('SELECT * FROM departments', (err, results) => {
@@ -781,14 +942,17 @@ function editDepartment(){
   (err, res) => {
     if (err) throw err;
   });
-connection.end();
-});
-})
-}
+    })
+    .then(() => {
+      run()
+      });
+    })
+};
 
 let choice = "";
 let sorting = "";
 let addingWhat = "";
+let viewThis = "";
 let editThis = "";
 let editEmployee = "";
 
