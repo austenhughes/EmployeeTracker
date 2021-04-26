@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql');
+require("console.table");
 
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -109,7 +110,7 @@ function viewManagers(){
         res.forEach(({ id, firstName, lastName }) => {
           allManagersArray.push("id",id,"firstName",firstName,"lastName",lastName);
       });
-        console.log(allManagersArray);
+        console.table(allManagersArray);
         return allManagersArray;
       };
 })
@@ -143,7 +144,7 @@ function viewDepartments(){
         res.forEach(({ id, departmentName }) => {
           allDepartmentsArray.push("id",id, "department name",departmentName);
       });
-        console.log(allDepartmentsArray);
+        console.table(allDepartmentsArray);
         return allDepartmentsArray;
       };
 })
@@ -158,9 +159,9 @@ function viewRoles(){
       else {
         const allRolesArray = [];
         res.forEach(({ id, jobTitle }) => {
-          allRolesArray.push("id",id, "department name",jobTitle);
+          allRolesArray.push("id",id, "job title",jobTitle);
       });
-        console.log(allRolesArray);
+        console.table(allRolesArray);
         return allRolesArray;
       };
 })
@@ -349,7 +350,7 @@ function selectDepartment(){
             res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
             employeeByDepartmentArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
           });
-            console.log(employeeByDepartmentArray);
+            console.table(employeeByDepartmentArray);
             return employeeByDepartmentArray;
           };
     })
@@ -359,7 +360,6 @@ function selectDepartment(){
   })
   });
 };
-
 
 function selectManager(){
   connection.query('SELECT * FROM employees', (err, results) => {
@@ -393,7 +393,7 @@ function selectManager(){
             res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
             employeeByManagerArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
           });
-            console.log(employeeByManagerArray);
+            console.table(employeeByManagerArray);
             return employeeByManagerArray;
           };
     })
@@ -432,7 +432,7 @@ function selectRole(){
             res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
             employeeByRolesArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
           });
-            console.log(employeeByRolesArray);
+            console.table(employeeByRolesArray);
             return employeeByRolesArray;
           };
     })
@@ -469,9 +469,9 @@ function sortByEmployee(){
       else {
         const employeesSortedArray = [];
         res.forEach(({ firstName, lastName, salary, managerID, departmentID, jobTitleID }) => {
-        employeesSortedArray.push("firstName",firstName,"lastName",lastName,"$",salary,"managerID",managerID,"departmentID",departmentID,"jobTitleID",jobTitleID);
+        employeesSortedArray.push(firstName,lastName,salary,managerID,departmentID,jobTitleID);
       });
-        console.log(employeesSortedArray);
+        console.table(employeesSortedArray);
         return employeesSortedArray;
       };
     })
@@ -545,62 +545,39 @@ function addEmployee(){
     type: 'input',
     message: 'what is your yearly salary?',
   },
+  // {
+  //     name: 'role',
+  //     type: 'list',
+  //     message: 'What is your job title/role ID?',
+      // choices() {
+      //   let titleArray = [];
+      //   let filteredArray = [];
+
+      //   results.forEach(({ jobTitleID }) => {
+      //   titleArray.push(jobTitleID);
+
+      //   filteredArray = titleArray.filter((c ,index) =>{
+      //   return titleArray.indexOf(c) === index;
+      //   });
+      //   });
+      //   return filteredArray;
+      // },    
+  // },
   {
-      name: 'role',
-      type: 'list',
-      message: 'What is your job title/role ID?',
-      choices() {
-        let titleArray = [];
-        let filteredArray = [];
-
-        results.forEach(({ jobTitleID }) => {
-        titleArray.push(jobTitleID);
-
-        filteredArray = titleArray.filter((c ,index) =>{
-        return titleArray.indexOf(c) === index;
-        });
-        });
-        return filteredArray;
-      },    
+    name: 'role',
+    type: 'input',
+    message: 'what is your role ID?',
   },
   {
-      name: 'department',
-      type: 'list',
-      message: 'What is your department ID?',
-      choices() {
-          let departmentArray = [];
-          let filteredArray = [];
-
-          results.forEach(({ departmentID }) => {
-          departmentArray.push(departmentID);
-
-          filteredArray = departmentArray.filter((c ,index) =>{
-          return departmentArray.indexOf(c) === index;
-          });
-
-          });
-          return filteredArray;
-        },    
+    name: 'department',
+    type: 'input',
+    message: 'what is your department ID',
   },
   {
-      name: 'manager',
-      type: 'list',
-      message: 'What is your managers ID?',
-      choices() {
-        const managerArray = [];
-        let filteredArray = [];
-
-        results.forEach(({ managerID }) => {
-        managerArray.push(managerID);
-
-        filteredArray = managerArray.filter((c ,index) =>{
-        return managerArray.indexOf(c) === index;
-        });
-
-        });
-        return filteredArray;
-      },
-  } 
+    name: 'manager',
+    type: 'input',
+    message: 'What is your managers ID?',
+  }
   ])
   .then((answer) => {
     connection.query(
@@ -641,16 +618,9 @@ function updateEmployeeRole(){
       },
       {
         name: 'updateRole',
-        type: 'list',
-        message: 'update role id to : ',
-        choices() {
-          const updateRoleArray = [];
-          results.forEach(({ jobTitleID }) => {
-          updateRoleArray.push(jobTitleID);
-          });
-          return updateRoleArray;
-        }
-      }, 
+        type: 'input',
+        message: 'new role ID : ',
+      },  
     ]).then((answer) => {
   connection.query(
   'UPDATE employees SET ? WHERE ?',
@@ -685,17 +655,10 @@ function updateManager(){
         }
       },
       {
-        name: 'updateManager',
-        type: 'list',
-        message: 'New manager : ',
-        choices() {
-          const updateManagerArray = [];
-          results.forEach(({ managerID }) => {
-          updateManagerArray.push(managerID);
-          });
-          return updateManagerArray;
-        }
-      }, 
+        name: 'updateManger',
+        type: 'input',
+        message: 'New manger ID : ',
+      }  
     ]).then((answer) => {
   connection.query(
   'UPDATE employees SET ? WHERE ?',
@@ -714,7 +677,7 @@ function updateManager(){
 };
 
 function updateDepartment(){
-  connection.query('SELECT * FROM employees FULL JOIN Department', (err, results) => {
+  connection.query('SELECT * FROM employees', (err, results) => {
     if (err) throw err;
     inquirer.prompt([
       {
@@ -731,16 +694,9 @@ function updateDepartment(){
       },
       {
         name: 'updateDepartment',
-        type: 'list',
-        message: 'New department : ',
-        choices() {
-          const updateDepartmentArray = [];
-          results.forEach(({ departmentid }) => {
-            updateDepartmentArray.push(departmentid);
-          });
-          return updateDepartmentArray;
-        }
-      }, 
+        type: 'input',
+        message: 'New department ID : ',
+      } 
     ]).then((answer) => {
   connection.query(
   'UPDATE employees SET ? WHERE ?',
